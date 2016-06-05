@@ -1,0 +1,160 @@
+---
+title: "Regression Homework"
+author: "Aaron"
+date: "June 5, 2016"
+output: html_document
+---
+
+The homework is from `Verzani`, problems: **13.1,13.2, 13.3, 13.4**
+
+```{r message=F}
+
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+
+```
+
+
+#### Problem 13.1
+
+The cost of a home depends on the number of bedrooms in the house. Suppose the following data is recorded for homes in a given town
+
+Make a scatterplot, and fit the data with a regression line. On the same graph, test the hypothesis that an extra bedroom costs $60,000 against the alternative that it costs more.
+
+
+```{r}
+
+house <- data.frame(price=c(300, 250, 400, 550, 317, 389, 425, 289, 389, 559), 
+                    num_br=c(3,3,4,5,4,3,6,3,4,5))
+
+house %>% 
+    ggplot(aes(num_br, price)) +
+    geom_point(size=2.5, alpha=0.7) + 
+    geom_smooth(method = lm)
+
+house %>% 
+    lm(price~num_br,.) -> fit_0
+
+```
+
+**Inferenece about `peta-1`**
+
+```{r}
+n = 10 # # of obs
+
+res = resid(fit_0) # find residual 
+b1 = (coefficients(fit_0))[[2]] # find beta 1
+
+SE = coefficients(summary(fit_0))[2,2]
+t=(b1-60)/SE
+
+pt(t, n-2 ,lower.tail=F)
+
+```
+
+We fail to reject the null hypothesis that an extra bedroom costs **$60,000 (p=.2982602).**
+
+#### Problem 13.2
+
+It is well known that the more beer you drink, the more your blood alcohol level rises. Suppose we have the following data on student beer consumption
+
+Make a scatterplot and fit the data with a regression line. Test the hypothesis that another beer raises your BAL by 0.02 percent against the alternative that it is less.
+
+```{r}
+
+beer <- data.frame(beer = c(5,2,9,8,3,7,3,5,3,5), 
+                   bal  = c(0.10, 0.03, 0.19, 0.12, 0.04, 0.095, 0.07, 0.06, 0.02, 0.05))
+
+beer %>% 
+    ggplot(aes(beer, bal)) +
+    geom_point(size=2.5, alpha=0.7) + 
+    geom_smooth(method = lm)
+
+beer %>% 
+    lm(bal ~ beer, .) -> fit_1
+
+```
+
+
+```{r}
+
+res = resid(fit_1) # find residual 
+n = length(res) # find number of obs
+
+b1 = (coefficients(fit_1))[[2]] # find beta 1
+
+SE = coefficients(summary(fit_1))[2,2]
+
+t=(b1-(0.02))/SE
+
+pt(t, n-2 ,lower.tail=TRUE)
+
+```
+
+We fail to reject the null hypothesis that another beer raises your BAL by **0.02 percent (p=0.4127342).**
+
+#### Problem 13.3
+
+For the same Blood alcohol data, do a hypothesis test that the intercept is 0 with a two-sided alternative.
+
+```{r}
+b0 = (coefficients(fit_1))[[1]]
+
+t = (b0 - 0)/SE
+
+p_two_sided = 2*pt(t,n-2,lower.tail=T)
+
+print(paste("the two sided p-value is", round(p_two_sided,5)))
+
+```
+
+We can reject H0 that the intercept is 0, so the intercept is highligh unlikely to be 0.
+
+
+#### Problem 13.4
+
+The lapse rate is the rate at which temperature drops as you increase elevation. Some hardy students were interested in checking empirically if the lapse rate of 9.8 degrees C/km was accurate for their hiking. To investigate, they grabbed their thermometers and their Suunto wrist altimeters and found the following data on their hike
+
+```{r}
+
+lapse <- data.frame(elevation = c(600, 1000, 1250, 1600, 1800, 2100, 2500, 2900), 
+                    temp = c(56, 54, 56, 50, 47, 49, 47, 45))
+
+```
+
+Draw a scatter plot with regression line, and investigate if the lapse rate is 9.8C/km. (First, it helps to convert to the rate of change in Fahrenheit per feet with is 5.34 degrees per 1000 feet.) 
+
+```{r}
+
+lapse %>% 
+    ggplot(aes(elevation, temp)) +
+    geom_point(size=2.5, alpha=0.7) + 
+    geom_smooth(method = lm)
+
+lapse %>% 
+    lm(temp ~ elevation, .) -> fit_2
+     
+
+b1 = (coefficients(fit_2))[[2]]
+
+```
+
+Test the hypothesis that the lapse rate is 5.34 degrees per 1000 feet against the alternative that it is less than this.
+
+```{r}
+
+res = resid(fit_2) # find residual 
+n = length(res) # find number of obs
+
+b1 = (coefficients(fit_2))[[2]] # find beta 1
+
+SE = coefficients(summary(fit_2))[2,2]
+
+t=(b1-(5.34/1000))/SE
+
+pt(t, n-2 ,lower.tail=TRUE)
+
+```
+
+We can reject the H0 and conclude that the rate of change is likely to be less than 5.34 degrees per 1000 feet. 
