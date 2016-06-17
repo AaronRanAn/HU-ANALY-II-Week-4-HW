@@ -1,0 +1,77 @@
+---
+title: "Regression Supplement"
+author: "James Muguira"
+date: "March 28, 2016"
+output: html_document
+---
+
+# Synopsis
+
+The practice of fitting a line to a set of points has *many* uses. For the purposes of this class I'll refer to this practice as regession or regression analysis. Regression is related to interpolation. Interpolation is the practice of fitting a line to a set of points.  Regression takes interpolation up another level, you are not just fitting the data, you are using that fitted line to: predict, assess relationships or describe some data.
+
+This class will consider linear relationships and analysis.  These linear relationships may employ multiple variables but we will still just be fitting a straight line to the data.  The linear regression has the general form:
+
+### y = m*x + b + er
+
+Where:
+
+* y is the dependent variable
+* x is the independent variable
+* M is the fit coefficient for the independent variable
+* b is the y-intercept
+* er is some error (or residual) associated with the line fitting algorithm
+
+The coefficients: m and b are computed by adjuting the slope of the line to minimize the total combined distance from the estimating equation to each individual raw point. Many text books cover this concept so we'll not cover it here. It is important to note that the error term (er) is composed of two elements: a specification error and a measurement error.  The specification error comes from the fact that the model is a simplification of reality. We, as modelers decide to leave off certain aspects of the problem and these omitted variables may have unforeseen impacts on our model.  The measurement error comes in the form of rounding, recording and missing data.
+
+# Discussion
+
+Regression is a form of data reduction. By that, I mean that a complex relationship between data points can be reduced to a more simple and easier to work with relationship. Consider the following data points.
+
+```{r}
+tt = jitter(2:100, factor=90.3)
+y = 0.2 * tt^(-0.02)
+plot(y)
+```
+
+The relationship is definitly linear. It would be nice to reduce the dimensions of this dataset to a simple formula. There are outliers at the beginning of the curve.  However, the scale of these points (*for this discussion*) are small and will be ignored.  Applying regression analysis would provide us with a formula to describe this system instead of the raw points.
+
+```{r}
+l_fit = lm(y ~ tt)
+summary(l_fit)
+```
+
+This regression representation depends on the following conditions:
+
+* The relatioship between the independent variable (x) and the dependent variable (y) is linear,
+* The terms of the independent variable (the x sub i's) are non random with fixed values,
+* The error term has a constant variance,
+* The dependent variables (each individual y sub i) are each independent.
+
+Visually this relationship an be show with the following:
+
+```{r}
+plot(y)
+abline(l_fit)
+```
+
+In text form the linear model is:
+
+y_hat = `r l_fit$coefficients[2]`*tt + `r l_fit$coefficients[1]`
+
+I called the dependent variable y_hat because the equation is an estimator of the independent variable. What information can we gather from this equation? Consider the coefficient `r l_fit$coefficients[2]`. For each 1 unit of change in the independent variable we get (`r l_fit$coefficients[2]` - `r l_fit$coefficients[1]`) units of change in the dependent variable.  We can also use the equation to prefict new values. For example, if we want to know what the 105'th value of the sequence is we simply compute it (i.e. `r l_fit$coefficients[1]` + `r l_fit$coefficients[2]` * 105 = `r l_fit$coefficients[2] * 105 - l_fit$coefficients[1]`). You have to be careful using regression to predict values outside of the data that created the regression equation. We'll cover this topic more in forecasting later in the semester. In this particular case we can see that the first few points to a poor job of aligning to the linear equation.  Using this regression equation to predict in that range would also produce errors. Estimating or predict values from the 20th to the 100th value does a reasonable job.
+
+## Validation
+
+We already have the tools to assess the validity of the regression equation: hypothesis testing. In this case we'll employ our 5 step process.
+
+* State a Null and Alternative Hypothesis. The Null hypothesis is established to test if the slope coefficient is zero (in most cases).  This would imply that there is no rstatistical elationship between the independent and dependent variables.
+* Select a level of significance or alpha.
+* Compute a t-test to see if we accept of reject the Null hypothesis based on our choosen level of significance.  For a two variable regression model evaluating the results of the t-test provide a straight forward validation of the model in terms of its predictive capability. Models invloving more variables utilize the additional aanalysis of variance statistics (the F-test and degrees of freedom) to assess validity.
+* Compute a confidence interval around our t-value
+* Compare our t-value to see if it lies inside the confidence interval.
+
+As you can see, selection of the significance value (alpha) is subjective.  The experience of the modeler and the dynamics of the problem provide some guidance but building models is as much an art as a science.
+
+# Conclusion
+
+Much more can be said about regression and validating the regression equation.  This note has only touched the surface.  One important take away from this discussion is the inter-relatedness of regression, analysis of variance and hypothesis testing.  Another important take away is the concept of reduction of dimensions afforded by the regression analysis.  This simplification of the problem space down to a few variables (or a forumla) is a powerful method to use to help understand complex situations.
